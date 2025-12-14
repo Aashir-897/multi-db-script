@@ -45,7 +45,12 @@ def main():
     # print(adapter_mg.execute_custom_query(insert_query))
     # print(adapter_mg.execute_custom_query(find_query))
     # print(adapter_mg.execute_custom_query(delete_query))
+
+
+    # for migrations
     print(adapter_my_sql.migrate("employee"))
+    print(adapter_pg.migrate("employee"))
+    print(adapter_mg.migrate("employee"))
 
 
 if __name__ == "__main__":
