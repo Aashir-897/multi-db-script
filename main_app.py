@@ -1,5 +1,5 @@
 from db_adapter import DbAdapter
-from db_engine import MySqlDatabase, PostgreSqlDatabase, MongoDatabase
+from engines import MySqlDatabase, PostgreSqlDatabase, MongoDatabase
 
 
 # Connection Queries
@@ -14,42 +14,43 @@ print(adapter_mg.connect())
 
 
 # Find Queries
-# users_my_sql = adapter_my_sql.execute_custom_query({
-#     "action": "find",
-#     "table": "users",
-#     'where': {'age':10}
-# })
-# print('This my Sql Reult', users_my_sql)
+users_my_sql = adapter_my_sql.execute_custom_query({
+    "action": "find",
+    "table": "users",
+    # 'where': {'age':10}
+})
+print('This my Sql Reult', users_my_sql)  
 
-# users_pg = adapter_pg.execute_custom_query({
-#     "action": "find",
-#     "table": "users",
-#     'where': {'age':10}
-# })
-# print('\nThis my postgreSql Reult', users_pg)
+users_pg = adapter_pg.execute_custom_query({
+    "action": "find",
+    "table": "users",
+    # 'where': {'age':10}
+})
+print('\nThis my postgreSql Reult', users_pg)
 
-# users_mg = adapter_mg.execute_custom_query({
-#     "action": "find",
-#     "table": "users",
-#     'where': {'age':10}
-# })
-# print('\nThis my mongoDb Reult', users_mg)
+users_mg = adapter_mg.execute_custom_query({
+    "action": "find",
+    "table": "users",
+    # 'where': {'age':10}
+})
+print('\nThis my mongoDb Reult', users_mg)
 
 
 
 
 # insert_query = {
 #     "action": "insert",
-#     "table": "users",
+#     "table": "employee",
 #     "data": {
-#         "name": "Kiddo",
-#         "age": 10,
+#         "e_name": "Kiddo",
+#         "e_age": 10,
+#         'e_email': 'user@gmail.com'
 #     }
 # }
 
-# adapter_my_sql.execute_custom_query(insert_query)
-# adapter_pg.execute_custom_query(insert_query)
-# adapter_mg.execute_custom_query(insert_query)
+# # print(adapter_my_sql.execute_custom_query(insert_query))
+# # print(adapter_pg.execute_custom_query(insert_query))
+# print(adapter_mg.execute_custom_query(insert_query))
 
 
 
@@ -72,14 +73,48 @@ print(adapter_mg.connect())
 # adapter_mg.execute_custom_query(update_query)
 
 
-delete_query = {
-    "action": "delete",
-    "table": "users",
-    "where": {"name": "Aashir_mongo"}
-}
+# delete_query = {
+#     "action": "delete",
+#     "table": "users",
+#     "where": {"name": "Aashir_mongo"}
+# }
 
-print(adapter_my_sql.execute_custom_query(delete_query))
-print(adapter_pg.execute_custom_query(delete_query))
-print(adapter_mg.execute_custom_query(delete_query))
+# print(adapter_my_sql.execute_custom_query(delete_query))
+# print(adapter_pg.execute_custom_query(delete_query))
+# print(adapter_mg.execute_custom_query(delete_query))
 
 
+# query = {
+#     "action": "table_create",
+#     "table": "employee",
+#     "columns": {
+#         "id": "INT PRIMARY KEY AUTO_INCREMENT NOT NULL",
+#         "e_name": "VARCHAR(50)",
+#         "e_age": "INT",
+#         "e_email": "VARCHAR(100) UNIQUE NOT NULL"
+#     }
+# }
+# # print(adapter_my_sql.execute_custom_query(query))
+# # print(adapter_pg.execute_custom_query(query))
+# print(adapter_mg.execute_custom_query(query))
+
+
+
+
+# query = {
+#     "action": "add_column",
+#     "table": "employee",
+#     "columns": {
+#         "department": {
+#             "type": "VARCHAR(50) NOT NULL",
+#             "default": "General"
+#         },
+#         "joining_year": {
+#             "type": "INT",
+#             "default": 2025
+#         }
+#     }
+# }
+# # print(adapter_my_sql.execute_custom_query(query))
+# print(adapter_pg.execute_custom_query(query))
+# # print(adapter_mg.execute_custom_query(query))

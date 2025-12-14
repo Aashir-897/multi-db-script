@@ -17,6 +17,11 @@ class DbAdapter:
             return self._engine.update(query)
         elif action == "delete":
             return self._engine.delete(query)
+        elif action == "table_create":
+            return self._engine.table_create(query)
+        elif action == "add_column":
+            return self._engine.add_column(query)
+        
         else:
             raise ValueError("Unsupported action")
     
