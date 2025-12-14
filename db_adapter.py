@@ -7,15 +7,16 @@ class DbAdapter:
         return self._engine.connect()
 
     def execute_custom_query(self, query):
-        if query.lower().startswith('select'):
+        action = query["action"]
+
+        if action == "find":
             return self._engine.find(query)
-        elif query.lower().startswith('insert'):
+        elif action == "insert":
             return self._engine.insert(query)
-        elif query.lower().startswith('update'):     
+        elif action == "update":
             return self._engine.update(query)
-        elif query.lower().startswith('delete'):
+        elif action == "delete":
             return self._engine.delete(query)
         else:
-            print("Unsupported query type.")
-
+            raise ValueError("Unsupported action")
     
