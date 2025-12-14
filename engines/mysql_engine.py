@@ -1,5 +1,7 @@
 from db_interface import DatabaseInterface
 import mysql.connector
+from schema_utils import build_mysql_columns  
+
 
 class MySqlDatabase(DatabaseInterface):
     def __init__(self):
@@ -103,36 +105,58 @@ class MySqlDatabase(DatabaseInterface):
         except Exception as e:
             return f"MySQL Deleting Error: {str(e)}"
 
-    def table_create(self, query):
-        try:
-            table = query["table"]
-            columns = query.get("columns", {})
-            col_defs = ", ".join([f"{k} {v}" for k, v in columns.items()])
-            sql = f"CREATE TABLE IF NOT EXISTS {table} ({col_defs})"
+    def table_exists(self, table):
+        cursor = self._connection.cursor()
+        cursor.execute("""
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_schema = DATABASE()
+            AND table_name = %s
+        """, (table,))
+        exists = cursor.fetchone()[0] > 0
+        cursor.close()
+        return exists
+    
 
-            cursor = self._connection.cursor()
-            cursor.execute(sql)
-            self._connection.commit()
-            cursor.close()
-            return f"MySQL: Table {table} created"
-        except Exception as e:
-            return f"MySQL Table Creation Error: {str(e)}"
+
+    def create_from_schema(self, table, schema):
         
-    def add_column(self, query):
-        try:
-            table = query["table"]
-            columns = query.get("columns", {})
+        cols = build_mysql_columns(schema)
+        sql = f"CREATE TABLE {table} ({cols})"
 
-            cursor = self._connection.cursor()
-            for col_name, col_def in columns.items():
-                col_type = col_def["type"]
-                default = col_def.get("default")
-                sql = f"ALTER TABLE {table} ADD COLUMN {col_name} {col_type}"
-                if default is not None:
-                    sql += f" DEFAULT '{default}'"
-                cursor.execute(sql)
-            self._connection.commit()
-            cursor.close()
-            return f"MySQL: Columns {', '.join(columns.keys())} added to {table}"
-        except Exception as e:
-            return f"MySQL Add Column Error: {str(e)}"
+        cursor = self._connection.cursor()
+        cursor.execute(sql)
+        self._connection.commit()
+        cursor.close()
+
+        return f"MySQL: Table {table} created via migration"
+
+
+    def add_missing_columns(self, table, schema):
+        cursor = self._connection.cursor()
+
+        cursor.execute("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = %s
+        """, (table,))
+
+        existing_cols = {row[0] for row in cursor.fetchall()}
+
+        added = []
+
+        for col, cfg in schema.items():
+            if col in existing_cols:
+                continue
+
+            col_def = build_mysql_columns({col: cfg})
+            sql = f"ALTER TABLE {table} ADD COLUMN {col_def}"
+            cursor.execute(sql)
+            added.append(col)
+
+        self._connection.commit()
+        cursor.close()
+
+        if added:
+            return f"MySQL: Added columns {added}"
+        return "MySQL: Schema already up to date"
