@@ -31,13 +31,13 @@ def main():
     find_query ={
         "action": "find",
         "table": "employee",
-        'where': {'e_age':10}
+        'where': {'age':10}
     }
 
     delete_query = {
         "action": "delete",
         "table": "employee",
-        "where": {"e_age" : 10}
+        "where": {"age" : 10}
     }
 
     # adapter_my_sql OR adapter_pg OR adapter_mg
