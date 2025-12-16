@@ -1,4 +1,5 @@
 from schema.registry import get_schema
+from schema.validator import validate_data
 
 class DbAdapter:    
     def __init__(self, engie_class):
@@ -13,10 +14,13 @@ class DbAdapter:
 
         if action == "find":
             return self._engine.find(query)
-        elif action == "insert":
-            return self._engine.insert(query)
-        elif action == "update":
-            return self._engine.update(query)
+        if action in ["insert", "update"]:
+            table = query["table"]
+            data = query["data"]
+            validated_data = validate_data(table, data, action)
+            query["data"] = validated_data
+            method = getattr(self._engine, action)
+            return method(query)        
         elif action == "delete":
             return self._engine.delete(query)
         else:

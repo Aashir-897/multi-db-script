@@ -13,17 +13,13 @@ def main():
     adapter_mg = DbAdapter(MongoDatabase)
     print(adapter_mg.connect())
 
-    # Quieries
-    create_query = {
-        "action": "table_create",
-        "table": "employee"
-    }
-
+    # Quieries    
     insert_query = {
         "action": "insert",
         "table": "employee",
         "data": {
             "name": "Kiddo",
+            "father_name": "Kiddo father",
             "age": 10,
             "email": "user@gmail.com"
         }
@@ -41,16 +37,16 @@ def main():
     }
 
     # adapter_my_sql OR adapter_pg OR adapter_mg
-    # print(adapter_mg.execute_custom_query(create_query))
+    # print(adapter_my_sql.execute_custom_query(insert_query))
     # print(adapter_mg.execute_custom_query(insert_query))
     # print(adapter_mg.execute_custom_query(find_query))
     # print(adapter_mg.execute_custom_query(delete_query))
 
 
     # for migrations
-    print(adapter_my_sql.migrate("employee"))
-    print(adapter_pg.migrate("employee"))
-    print(adapter_mg.migrate("employee"))
+    # print(adapter_my_sql.migrate("employee"))
+    # print(adapter_pg.migrate("employee"))
+    # print(adapter_mg.migrate("employee"))
 
 
 if __name__ == "__main__":
