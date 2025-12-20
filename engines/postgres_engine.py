@@ -38,6 +38,36 @@ class PostgreSqlDatabase(DatabaseInterface):
         except Exception as e:
             return f"PostgreSQL Finding Error: {str(e)}"
         
+
+    def find_with_join(self, query):
+        try:
+            base_table = query["table"]
+            joins = query.get("join", [])
+            
+            select_parts = [f"{base_table}.*"]
+            join_sql = ""
+
+            for j in joins:
+                jt = j["table"]
+                on = j["on"]
+                sel_cols = j.get("select", [])
+                select_parts.extend(sel_cols)
+                join_sql += f" JOIN {jt} ON {on}"
+
+            sql = f"SELECT {', '.join(select_parts)} FROM {base_table} {join_sql}"
+            
+            cursor = self._connection.cursor()  # no dictionary=True
+            cursor.execute(sql)
+            rows = cursor.fetchall()
+
+            columns = [desc[0] for desc in cursor.description]
+            result = [dict(zip(columns, row)) for row in rows]
+            cursor.close()
+            return result
+
+        except Exception as e:
+            return f"PostgreSQL Join Finding Error: {str(e)}"
+        
     def insert(self, query):
         try:
             table = query["table"]

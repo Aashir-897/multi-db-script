@@ -33,7 +33,33 @@ class MySqlDatabase(DatabaseInterface):
             cursor.execute(sql, values)
             return cursor.fetchall()
         except Exception as e:
-            return f"MySQL Finding Error: {str(e)}"  
+            return f"MySQL Finding Error: {str(e)}"
+
+
+    def find_with_join(self, query):
+        try:
+            base_table = query["table"]
+            joins = query.get("join", [])
+            
+            select_parts = [f"{base_table}.*"]
+            join_sql = ""
+
+            for j in joins:
+                jt = j["table"]
+                on = j["on"]
+                sel_cols = j.get("select", [])
+                select_parts.extend(sel_cols)
+                join_sql += f" JOIN {jt} ON {on}"
+
+            sql = f"SELECT {', '.join(select_parts)} FROM {base_table} {join_sql}"
+            
+            cursor = self._connection.cursor(dictionary=True)
+            cursor.execute(sql)
+            result = cursor.fetchall()
+            cursor.close()
+            return result
+        except Exception as e:
+            return f"MySQL Join Finding Error: {str(e)}"
 
     def insert(self, query):
         try:
@@ -120,7 +146,6 @@ class MySqlDatabase(DatabaseInterface):
 
 
     def create_from_schema(self, table, schema):
-        
         cols = build_mysql_columns(schema)
         sql = f"CREATE TABLE {table} ({cols})"
 
@@ -130,7 +155,6 @@ class MySqlDatabase(DatabaseInterface):
         cursor.close()
 
         return f"MySQL: Table {table} created via migration"
-
 
     def add_missing_columns(self, table, schema):
         cursor = self._connection.cursor()

@@ -21,6 +21,43 @@ class MongoDatabase(DatabaseInterface):
             return f"MongoDB Finding Error: {str(e)}"
         
 
+    def find_with_join(self, query):
+        base_coll = self._db[query["table"]]
+        pipeline = []
+
+        for j in query.get("join", []):
+            jt = j["table"]
+            on = j["on"].split("=")
+            local_field = on[0].split(".")[-1].strip()
+            foreign_field = on[1].split(".")[-1].strip()
+            as_field = jt
+
+            # Lookup
+            pipeline.append({
+                "$lookup": {
+                    "from": jt,
+                    "localField": local_field,
+                    "foreignField": foreign_field,
+                    "as": as_field
+                }
+            })
+
+            # Unwind so that join fields are top-level
+            pipeline.append({"$unwind": f"${as_field}"})
+
+            # Project only required fields
+            proj = {}
+            for field in j.get("select", []):
+                if field.startswith(f"{jt}."):
+                    proj[field.split(".")[1]] = f"${as_field}.{field.split('.')[1]}"
+                else:
+                    proj[field.split(".")[1]] = f"${field.split('.')[1]}"
+            if proj:
+                pipeline.append({"$project": proj})
+
+        return list(base_coll.aggregate(pipeline))
+        
+
     def insert(self, query):
         try:
             collection = self._db[query["table"]]

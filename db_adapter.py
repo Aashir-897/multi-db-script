@@ -13,7 +13,11 @@ class DbAdapter:
         action = query["action"]
 
         if action == "find":
-            return self._engine.find(query)
+            if "join" in query:
+                method = getattr(self._engine, "find_with_join")
+            else:
+                method = getattr(self._engine, "find")
+            return method(query)
         if action in ["insert", "update"]:
             table = query["table"]
             data = query["data"]
